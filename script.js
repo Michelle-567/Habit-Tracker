@@ -1,11 +1,16 @@
-const habitForm = document.getElementById("habit-form");
-const habitInput = document.getElementById("habit-input");
-const habitList = document.getElementById("habit-list");
+const habitInput = document.getElementById("habitInput");
+const habitList = document.getElementById("habitList");
 
-let habits = JSON.parse(localStorage.getItem("habits")) || [];
+let habits = [];
 
-function saveHabits() {
-  localStorage.setItem("habits", JSON.stringify(habits));
+function addHabit() {
+  const name = habitInput.value.trim();
+  if (name) {
+    habits.push({ name, completed: false });
+    habitInput.value = "";
+    saveHabits();
+    renderHabits();
+  }
 }
 
 function renderHabits() {
@@ -13,17 +18,21 @@ function renderHabits() {
   habits.forEach((habit, index) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${habit.name}
-      <button onclick="removeHabit(${index})">Remove</button>
+      <label>
+        <input type="checkbox" onchange="toggleHabit(${index})" ${
+      habit.completed ? "checked" : ""
+    }>
+        ${habit.name}
+      </label>
+      <button onclick="removeHabit(${index})">❌</button>
     `;
     habitList.appendChild(li);
   });
 }
 
-function addHabit(name) {
-  habits.push({ name });
+function toggleHabit(index) {
+  habits[index].completed = !habits[index].completed;
   saveHabits();
-  renderHabits();
 }
 
 function removeHabit(index) {
@@ -32,13 +41,16 @@ function removeHabit(index) {
   renderHabits();
 }
 
-habitForm.addEventListener("submit", function (e) {
-  e.preventDefault();
-  const habitName = habitInput.value.trim();
-  if (habitName) {
-    addHabit(habitName);
-    habitInput.value = "";
-  }
-});
+function saveHabits() {
+  localStorage.setItem("myHabits", JSON.stringify(habits));
+}
 
-renderHabits();
+function loadHabits() {
+  const storedHabits = localStorage.getItem("myHabits");
+  if (storedHabits) {
+    habits = JSON.parse(storedHabits);
+    renderHabits();
+  }
+}
+
+loadHabits();
